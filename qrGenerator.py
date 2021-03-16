@@ -8,7 +8,9 @@ from mailmerge import MailMerge # for writing to WORD.doc
 import pyqrcode
 import png
 
+# move this to another function
 template = "templates/1_5x13_4template.docx"
+#template = "templates/"
 document = MailMerge(template)
 
 template_options = ['Avery 6467', 'Avery 94214', 'Avery 5161']
