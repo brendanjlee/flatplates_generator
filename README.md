@@ -1,11 +1,13 @@
 # flatplates_generator
  Flatplate item code and QR generator <br>
- <br><b>what Works</b><br>
+<b>What Works</b>
  - Users can choose print template
  - Generates QR codes as png and saves it
  <br>
  <b>TODO</b>
- <br>
  - Export the product code and qrcode to word docx
  - Implement range instead of quantity
+ 
+<br>
+<br>
 <img width="507" alt="Screen Shot 2021-03-16 at 4 45 00 PM" src="https://user-images.githubusercontent.com/31088155/111377377-f3d4bb00-8676-11eb-91f1-1e3439fe6cef.png">
