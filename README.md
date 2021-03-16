@@ -4,7 +4,7 @@
  - Users can choose print template
  - Generates QR codes as png and saves it
  <br>
-<b>Todo</b>
+<b>Todo</b><br>
 - Export the product code and qrcode to word docx<br>
 - Implement range instead of quantity
 
