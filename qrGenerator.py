@@ -1,5 +1,7 @@
+
 from __future__ import print_function
 import tkinter as tk # GUI
+from tkinter.filedialog import asksaveasfile
 import subprocess
 from __main__ import *
 import lxml
@@ -8,12 +10,7 @@ from mailmerge import MailMerge # for writing to WORD.doc
 import pyqrcode
 import png
 
-# move this to another function
-template = "templates/1_5x13_4template.docx"
-#template = "templates/"
-document = MailMerge(template)
-
-template_options = ['Avery 6467', 'Avery 94214', 'Avery 5161']
+template_options = ['Avery_6467', 'Avery_94214', 'Avery_5161']
 fiber_options = ["C3", "C4", "C5", "D3", "D4", "D5"]  # list entries for fiber options dropdown
 gsm_options = ["69", "76", "120", "125"]  # list entries for gsm options dropdown
 manyear_options = ["P20", "P21", "A21", "F21"] # list entries for manufacture year
@@ -79,46 +76,55 @@ class Flatplatedata(tk.Frame):
         self.manyeartype.place(x=300, y=218)
 
         # Label and Field for Part Identifier
-        self.quantlab = tk.Label(self.parent,  text="Range of plates:", fg='black', relief="sunken", font=("Helvetica", "12", "bold"))
+        self.quantlab = tk.Label(self.parent,  text="Range of plates (start, end):", fg='black', relief="sunken", font=("Helvetica", "12", "bold"))
         self.quantlab.place(x=70, y=260)
-        self.quant_low=tk.Entry(self.parent)
+        # Minimum quant field
+        self.quant_low = tk.Entry(self.parent)
+        self.quant_low.insert(0, "0")
         self.quant_low.place(x=300, y=260, width=50)
-
+        # Maximum quant field
         self.quant_high = tk.Entry(self.parent)
+        self.quant_high.insert(0, "1")
         self.quant_high.place(x=355, y=260, width=50)
 
         # Generate Button
         global prevButton
-        prevButton = tk.Button(self.parent, text="Generate Labels", fg='black', bg='green', relief="ridge", font=("Helvetica", "14", "bold"), command=self.Preview)
+        prevButton = tk.Button(self.parent, text="Generate Labels", fg='black', bg='green', relief="ridge", font=("Helvetica", "14", "bold"), command=self.generate_codes)
         prevButton.place(x=175, y=435)
 
     # Generates preview of the code
-    def Preview(self):
+    # Also creates a list of codes based on quantity
+    def generate_codes(self):
+        #data = [('All tyes(*.*)', '*.*')]
+        #file = asksaveasfile(filetypes = data, defaultextension = data)
+
         fib = self.fibtype_str.get()
         gsm = self.gsmtype_str.get()
         lot = self.lottype.get()
         manyear = self.manyearlab_str.get()
+        quant_lo = 0
         quant_lo = self.quant_low.get()
+        quant_hi = 0
         quant_hi = self.quant_high.get()
+        quant = quant_hi
 
-        x = int(quant_lo)
+        x = int(quant_hi)
         quantset = range(1, x + 1, 1)
-        codeset = [None] * x
-        qrset = [None] * x
-        i = 0
-        #LOOPS CODES INTO SET OF LEN = QAUNTITY
-        while x > 0 and i < (int(quant)):
-            for n in quantset:
-                # Generate part code
-                code = "{}-{}-{}-{}-{}".format(fib, gsm, lot, manyear, n)
-                codeset[i] = code
-                # Generate QRcode and store it in /generated_qr/
-                url = generate_url(code)
-                qrcode = pyqrcode.create(url)
-                tmp_png = "generated_qr/" + str(code) + ".png"
-                qrcode.png(tmp_png, scale=4)
-                qrset[i] = tmp_png
-                i += 1
+        print(type(quantset))
+        codeset = []
+        qrset = []
+        code = ''   # stores sheet string
+
+        for i in range(int(quant_lo), int(quant_hi) + 1):
+            # Genreate sheet string code
+            code = "{}-{}-{}-{}-{}".format(fib, gsm, lot, manyear, i)
+            codeset.append(code)
+            url = generate_url(code)
+            # Generate QR code
+            qrcode = pyqrcode.create(url)
+            tmp_png = "generated_qr/" + str(code) + ".png"
+            qrcode.png(tmp_png, scale=4)
+            qrset.append(tmp_png)
 
         # Print Preview on GUI
         preview = tk.Label(self.parent, text="Preview:", fg='black', font=("Helvetica", "10", "bold"))  # preview label
@@ -126,16 +132,37 @@ class Flatplatedata(tk.Frame):
         codePrev = tk.Label(self.parent, text=code, fg='black', relief="sunken", font=("Helvetica", "24", "bold")) #product code label
         codePrev.place(x=70, y=370)
 
-        print(document.get_merge_fields())
+        # Name for Word Document to be printed
+        self.outfile_name = "{}-{}-{}-{}_{}.docx".format(fib, gsm, lot, manyear, self.template_str.get())
+        print(self.outfile_name)
+
+        # Debug print
+        #print('Chosen Template: ' + str(self.template_str.get()))
+
+
+        #print(document.get_merge_fields())
         # Write to Document
         #QRurl = 'C:\\Users\\jackg\\PycharmProjects\\flatplates\\QRs\\Flatplates.jpg'
         #reformURL = urllib.parse.quote_plus(QRurl)
-        dictOfCodes = {str(i): codeset[i] for i in range(0,int(quant))}
+        #dictOfCodes = {str(i): codeset[i] for i in range(0,int(quant))}
         #dictOfCodes['imagepath'] = 'generated_qr/'
-        document.merge(**dictOfCodes)
+        #document.merge(**dictOfCodes)
+        #document.merge(url=code)
+        #document.write('generated_docx/test.docx')
+
+        self.print_to_doc(codeset, (int(quant_hi) - int(quant_hi)))
+
+    def print_to_doc(self, codeset, quant):
+        #template = "templates/1_5x13_4template.docx"
+        template = 'templates/Avery5161.doc'
+        document = MailMerge(template)
+        i = 0
+        dictofCodes = {str(i): codeset[i] for i in range(0, int(quant))}
+        document.merge(**dictofCodes)
         #document.merge(url=code)
         document.write('generated_docx/test.docx')
-        #print(dictOfCodes)
+
+
 
 if __name__ == '__main__':
     root = tk.Tk()
