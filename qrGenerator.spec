@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['qrGenerator.py'],
-             pathex=['/Users/brendanlee/Desktop/CSMC/flatplates_generator'],
+             pathex=['C:\\Users\\brend\\Desktop\\CSMC\\flatplates_generator'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -26,7 +26,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=False )
+          console=True )
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
@@ -35,7 +35,3 @@ coll = COLLECT(exe,
                upx=True,
                upx_exclude=[],
                name='qrGenerator')
-app = BUNDLE(coll,
-             name='qrGenerator.app',
-             icon=None,
-             bundle_identifier=None)

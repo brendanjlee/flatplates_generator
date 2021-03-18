@@ -4,11 +4,14 @@ import tkinter as tk # GUI
 from tkinter.filedialog import asksaveasfile
 import subprocess
 from __main__ import *
-import lxml
+#import lxml
 from urllib import parse
 from mailmerge import MailMerge # for writing to WORD.doc
 import pyqrcode
 import png
+import labels
+from reportlab.graphics import shapes
+from reportlab.graphics.shapes import Image
 
 template_options = ['Avery_6467', 'Avery_94214', 'Avery_5161']
 fiber_options = ["C3", "C4", "C5", "D3", "D4", "D5"]  # list entries for fiber options dropdown
@@ -27,7 +30,7 @@ class Flatplatedata(tk.Frame):
         self.parent = parent
         self.initialize_user_interface()
 
-    # Function initializes the user interface
+    # Function initializes the user interface (GUI)
     def initialize_user_interface(self):
         self.parent.geometry("500x500")
         self.parent.title("Flatplate label/QR generator")
@@ -102,11 +105,10 @@ class Flatplatedata(tk.Frame):
         gsm = self.gsmtype_str.get()
         lot = self.lottype.get()
         manyear = self.manyearlab_str.get()
-        quant_lo = 0
+        quant_lo = 1
         quant_lo = self.quant_low.get()
-        quant_hi = 0
+        quant_hi = 1
         quant_hi = self.quant_high.get()
-        quant = quant_hi
 
         x = int(quant_hi)
         quantset = range(1, x + 1, 1)
@@ -123,7 +125,7 @@ class Flatplatedata(tk.Frame):
             # Generate QR code
             qrcode = pyqrcode.create(url)
             tmp_png = "generated_qr/" + str(code) + ".png"
-            qrcode.png(tmp_png, scale=4)
+            qrcode.png(tmp_png, scale=1)
             qrset.append(tmp_png)
 
         # Print Preview on GUI
@@ -134,34 +136,39 @@ class Flatplatedata(tk.Frame):
 
         # Name for Word Document to be printed
         self.outfile_name = "{}-{}-{}-{}_{}.docx".format(fib, gsm, lot, manyear, self.template_str.get())
-        print(self.outfile_name)
+        self.to_pdf(int(quant_hi) - int(quant_lo), codeset, qrset)
 
-        # Debug print
-        #print('Chosen Template: ' + str(self.template_str.get()))
+    # All sizes are in mm
+    def to_pdf(self, quant, codeset, qrset):
+        # Label and Page specifications
+        label_h = 12.7
+        label_w = 44.45
+        top_mar=12.7
+        bot_mar=10.668
+        left_mar=9.906
+        right_mar=7.874
+        num_col = 4
+        num_row = 20
 
+        #specs = labels.Specification(215.9, 279.4, num_col, num_row, label_width, label_height, corner_radius=2, top_margin=top_mar, botom_margin=bot_mar, left_margin=left_mar, right_margin=right_mar)
+        specs = labels.Specification(215.9, 279.4, num_col, num_row, label_w, label_h, corner_radius=2, top_margin=top_mar, bottom_margin=bot_mar, left_margin=left_mar, right_margin=right_mar)
+        sheet = labels.Sheet(specs, self.draw_label, border=True)
 
-        #print(document.get_merge_fields())
-        # Write to Document
-        #QRurl = 'C:\\Users\\jackg\\PycharmProjects\\flatplates\\QRs\\Flatplates.jpg'
-        #reformURL = urllib.parse.quote_plus(QRurl)
-        #dictOfCodes = {str(i): codeset[i] for i in range(0,int(quant))}
-        #dictOfCodes['imagepath'] = 'generated_qr/'
-        #document.merge(**dictOfCodes)
-        #document.merge(url=code)
-        #document.write('generated_docx/test.docx')
+        # print the labels
+        j = 0
+        for i in codeset:
+            sheet.add_label(i)
+            j += 1
+        
+        sheet.add_labels(range(j, 79))
+            
 
-        self.print_to_doc(codeset, (int(quant_hi) - int(quant_hi)))
-
-    def print_to_doc(self, codeset, quant):
-        #template = "templates/1_5x13_4template.docx"
-        template = 'templates/Avery5161.doc'
-        document = MailMerge(template)
-        i = 0
-        dictofCodes = {str(i): codeset[i] for i in range(0, int(quant))}
-        document.merge(**dictofCodes)
-        #document.merge(url=code)
-        document.write('generated_docx/test.docx')
-
+        sheet.save('outter.pdf')
+        print('Printing Complete')
+    
+    def draw_label(self, label, width, height, obj):
+        label.add(shapes.String(2, 2, str(obj), fontName="Helvetica", fontSize=8))
+        #label.add(Image(25, 42, 80, 80, obj.get('image')))
 
 
 if __name__ == '__main__':

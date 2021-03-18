@@ -38,8 +38,6 @@
 # The code below creates the default class bindings for text widgets.
 #-------------------------------------------------------------------------
 
-
-
 # Standard Motif bindings:
 
 bind Text <1> {
@@ -85,7 +83,6 @@ bind Text <B1-Enter> {
 bind Text <ButtonRelease-1> {
     tk::CancelRepeat
 }
-
 bind Text <Control-1> {
     %W mark set insert @%x,%y
     # An operation that moves the insert mark without making it
@@ -391,26 +388,6 @@ bind Text <Meta-Delete> {
     }
 }
 
-# Bindings for IME text input.
-
-bind Text <<TkStartIMEMarkedText>> {
-    dict set ::tk::Priv(IMETextMark) "%W" [%W index insert]
-}
-bind Text <<TkEndIMEMarkedText>> {
-    if { [catch {dict get $::tk::Priv(IMETextMark) "%W"} mark] } {
-	bell
-    } else {
-	%W tag add IMEmarkedtext $mark insert
-	%W tag configure IMEmarkedtext -underline on
-    }
-}
-bind Text <<TkClearIMEMarkedText>> {
-    %W delete IMEmarkedtext.first IMEmarkedtext.last
-}
-bind Text <<TkAccentBackspace>> {
-    %W delete insert-1c
-}
-
 # Macintosh only bindings:
 
 if {[tk windowingsystem] eq "aqua"} {
@@ -482,11 +459,11 @@ if {[tk windowingsystem] eq "aqua"} {
     }
 }
 
-if {[tk windowingsystem] eq "x11"} {
+if {"x11" eq [tk windowingsystem]} {
     # Support for mousewheels on Linux/Unix commonly comes through mapping
     # the wheel to the extended buttons.  If you have a mousewheel, find
     # Linux configuration info at:
-    #	http://linuxreviews.org/howtos/xfree/mouse/
+    #	http://www.inria.fr/koala/colas/mouse-wheel-scroll/
     bind Text <4> {
 	if {!$tk_strictMotif} {
 	    %W yview scroll -50 pixels
@@ -791,9 +768,6 @@ proc ::tk::TextKeySelect {w new} {
 	}
 	$w mark set $anchorname insert
     } else {
-        if {[catch {$w index $anchorname}]} {
-            $w mark set $anchorname insert
-        }
 	if {[$w compare $new < $anchorname]} {
 	    set first $new
 	    set last $anchorname
@@ -914,10 +888,11 @@ proc ::tk::TextInsert {w s} {
 
 # ::tk::TextUpDownLine --
 # Returns the index of the character one display line above or below the
-# insertion cursor.  There is a tricky thing here: we want to maintain the
-# original x position across repeated operations, even though some lines
-# that will get passed through don't have enough characters to cover the
-# original column.
+# insertion cursor.  There are two tricky things here.  First, we want to
+# maintain the original x position across repeated operations, even though
+# some lines that will get passed through don't have enough characters to
+# cover the original column.  Second, don't try to scroll past the
+# beginning or end of the text.
 #
 # Arguments:
 # w -		The text window in which the cursor is to move.
@@ -934,11 +909,11 @@ proc ::tk::TextUpDownLine {w n} {
     set lines [$w count -displaylines $Priv(textPosOrig) $i]
     set new [$w index \
 	    "$Priv(textPosOrig) + [expr {$lines + $n}] displaylines"]
-    set Priv(prevPos) $new
-    if {[$w compare $new == "end display lineend"] \
-            || [$w compare $new == "insert display linestart"]} {
-        set Priv(textPosOrig) $new
+    if {[$w compare $new == end] \
+	    || [$w compare $new == "insert display linestart"]} {
+	set new $i
     }
+    set Priv(prevPos) $new
     return $new
 }
 
@@ -1080,13 +1055,13 @@ proc ::tk_textCut w {
         # make <<Cut>> an atomic operation on the Undo stack,
         # i.e. separate it from other delete operations on either side
 	set oldSeparator [$w cget -autoseparators]
-	if {([$w cget -state] eq "normal") && $oldSeparator} {
+	if {$oldSeparator} {
 	    $w edit separator
 	}
 	clipboard clear -displayof $w
 	clipboard append -displayof $w $data
 	$w delete sel.first sel.last
-	if {([$w cget -state] eq "normal") && $oldSeparator} {
+	if {$oldSeparator} {
 	    $w edit separator
 	}
     }
