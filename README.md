@@ -1,13 +1,19 @@
 # flatplates_generator
- Flatplate item code and QR generator <br><br>
-<b>What Works</b>
- - Users can choose print template
- - Generates QR codes as png and saves it
- <br>
-<b>Todo</b><br>
-- Export the product code and qrcode to word docx<br>
-- Implement range instead of quantity
 
-<br>
+Create QR Code labels for Flatplates with Python.
+
+Uses a simple GUI to produce sheets of QR Code labels on following formats: Avery 6467, Avery 5161, and Avery 94214.<br>
+
+Dependencies:<br>
+```
+import tkinter as tk
+import pyqrcode
+import png
+import labels
+from reportlab.graphics import shapes
+from reportlab.graphics.shapes import Image
+```
+
+Demo of GUI
 <br>
 <img width="507" alt="Screen Shot 2021-03-16 at 4 45 00 PM" src="https://user-images.githubusercontent.com/31088155/111377377-f3d4bb00-8676-11eb-91f1-1e3439fe6cef.png">
