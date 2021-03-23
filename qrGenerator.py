@@ -4,6 +4,8 @@ from tkinter.filedialog import asksaveasfile
 import pyqrcode
 import png
 import labels
+import os
+import sys
 from reportlab.graphics import shapes
 from reportlab.graphics.shapes import Image
 
@@ -92,6 +94,10 @@ class Flatplatedata(tk.Frame):
 
     # Takes input from GUI to prepare for printing
     def generate_codes(self):
+      # Ask for path
+      self.path = tk.filedialog.askdirectory(title='Select Folder')
+      print(self.path)
+
       quant_lo = 1
       quant_lo = int(self.quant_low.get())
       quant_hi = 1
@@ -110,7 +116,9 @@ class Flatplatedata(tk.Frame):
         # Generate QRcode
         url = generate_url(code)
         qr = pyqrcode.create(url)
-        qr_path = 'generated_qr/' + str(code) + '.png'
+        # for macs
+        #qr_path = self.path + '/' + str(code) + '.png'
+        qr_path = self.path + '\\' + str(code) + '.png'
         qr.png(qr_path, scale=2)
         qrset.append(qr_path)
 
@@ -121,6 +129,7 @@ class Flatplatedata(tk.Frame):
       codePrev.place(x=70, y=370)
 
       self.get_pdf(codeset, qrset)
+
 
     # Generate the pdf
     def get_pdf(self, codeset, qrset):
@@ -137,21 +146,30 @@ class Flatplatedata(tk.Frame):
             }
         sheet.add_label(_print_dict)
 
-      sheet.save('output1.pdf')
+      # for mac
+      #sheet.save(self.path + '/flatplates_codes.pdf')
+      # for windows
+      sheet.save(self.path + '\\flatplates_codes.pdf')
+
+      # Delete files in path
+      for i in qrset:
+        print('deleted' + i)
+        os.remove(i)
+
       print('Print Complete')
-      return
+
 
     # Draw two objects into label: product code and QRcode
     # The size and font changes depending on the template
     def draw_label(self, label, width, height, obj):
       if self.template_str.get() == 'Avery_6467':
-        label.add(shapes.String(2, 6, obj.get('text'), fontName="Helvetica", fontSize=8))
-        label.add(Image(70 + len(obj.get('text')), 2, 30, 30, obj.get('image')))
+        label.add(shapes.String(4, 15, obj.get('text'), fontName="Helvetica", fontSize=8))
+        label.add(Image(90, 4, 30, 30, obj.get('image')))
       elif self.template_str.get() == 'Avery_5161':
-        label.add(shapes.String(2, 20, obj.get('text'), fontName="Helvetica", fontSize=14))
-        label.add(Image(140 + len(obj.get('text')) * 2, 2, 60, 60, obj.get('image')))
-      else:
-        label.add(shapes.String(2, 6, obj.get('text'), fontName="Helvetica", fontSize=10))
+        label.add(shapes.String(15, 30, obj.get('text'), fontName="Helvetica", fontSize=12))
+        label.add(Image(180, 4, 60, 60, obj.get('image')))
+      elif self.template_str.get() == 'Avery_94214':
+        label.add(shapes.String(10, 15, obj.get('text'), fontName="Helvetica", fontSize=10))
         label.add(Image(150, 2, 40, 40, obj.get('image')))
 
     # return template dim -> (label_h, label_w, top_mar, bot_mar, left_mar, right_mar, num_col, num_row)
