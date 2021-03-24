@@ -21,6 +21,7 @@ def generate_url(part_num):
   url += str(part_num) + '/' + str(part_num) + '.pdf'
   return url
 
+# GUI and rest of program runs here
 class Flatplatedata(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -33,11 +34,13 @@ class Flatplatedata(tk.Frame):
         self.parent.title("Flatplate label/QR generator")
 
         # Title Label
-        lab1 = tk.Label(self.parent, text="Enter Flatplate Info", fg='purple', bg="yellow", relief='solid',font=("Helvetica", "14", "bold"))
+        lab1 = tk.Label(self.parent, text="Enter Flatplate Info", fg='purple', bg="yellow", relief='solid',
+                        font=("Helvetica", "14", "bold"))
         lab1.place(x=170, y=0)
 
         # Allows User to choose template type
-        self.template_lab = tk.Label(self.parent, text='Print Template Type:', fg='black', relief='sunken', font=('Helvetica', '12', 'bold'))
+        self.template_lab = tk.Label(self.parent, text='Print Template Type:', fg='black', relief='sunken',
+                                     font=('Helvetica', '12', 'bold'))
         self.template_lab.place(x=70, y = 35)
         self.template_str = tk.StringVar(self.parent) # contains value
         self.template_str.set(template_options[0])
@@ -45,7 +48,8 @@ class Flatplatedata(tk.Frame):
         self.template_type.place(x=300, y=38)
 
         # Label and Field for Fiber Type
-        self.fiblab = tk.Label(self.parent, text="Fiber type & ply #:", fg='black', relief="sunken", font=("Helvetica", "12", "bold"))
+        self.fiblab = tk.Label(self.parent, text="Fiber type & ply #:", fg='black', relief="sunken",
+                               font=("Helvetica", "12", "bold"))
         self.fiblab.place(x=70, y=80)
         self.fibtype_str = tk.StringVar(self.parent) # contains value
         self.fibtype_str.set(fiber_options[0])
@@ -61,14 +65,16 @@ class Flatplatedata(tk.Frame):
         self.gsmtype.place(x=300, y=128)
 
         # Label and Field Lot
-        self.lotlab = tk.Label(self.parent, text="Lot #:", fg='black', relief="sunken", font=("Helvetica", "12", "bold"))
+        self.lotlab = tk.Label(self.parent, text="Lot #:", fg='black', relief="sunken",
+                              font=("Helvetica", "12", "bold"))
         self.lotlab.place(x=70, y=170)
         self.lottype=tk.Entry(self.parent) # contains value
         self.lottype.insert(0, "#####-#")
         self.lottype.place(x=300, y=173)
 
         # Label and Field for Manufacture Year
-        self.manyearlab = tk.Label(self.parent, text="Manufacturer & Year:", fg='black', relief="sunken", font=("Helvetica", "12", "bold"))
+        self.manyearlab = tk.Label(self.parent, text="Manufacturer & Year:", fg='black', relief="sunken",
+                                   font=("Helvetica", "12", "bold"))
         self.manyearlab.place(x=70, y=215)
         self.manyearlab_str = tk.StringVar(self.parent) # contains value
         self.manyearlab_str.set(manyear_options[0])
@@ -76,7 +82,8 @@ class Flatplatedata(tk.Frame):
         self.manyeartype.place(x=300, y=218)
 
         # Label and Field for Part Identifier
-        self.quantlab = tk.Label(self.parent,  text="Range of plates (start, end):", fg='black', relief="sunken", font=("Helvetica", "12", "bold"))
+        self.quantlab = tk.Label(self.parent,  text="Range of plates (start, end):", fg='black', relief="sunken",
+                                 font=("Helvetica", "12", "bold"))
         self.quantlab.place(x=70, y=260)
         # Minimum quant field
         self.quant_low = tk.Entry(self.parent) # contains value
@@ -89,12 +96,16 @@ class Flatplatedata(tk.Frame):
 
         # Generate Button
         global prevButton
-        prevButton = tk.Button(self.parent, text="Generate Labels", fg='black', bg='green', relief="ridge", font=("Helvetica", "14", "bold"), command=self.generate_codes)
+        # Calls the function generate_codes()
+        prevButton = tk.Button(self.parent, text="Generate Labels", fg='black', bg='green',
+                               relief="ridge", font=("Helvetica", "14", "bold"), command=self.generate_codes)
         prevButton.place(x=175, y=435)
 
     # Takes input from GUI to prepare for printing
     def generate_codes(self):
       # Ask for path
+      # QR codes are generated in this path, which are read by the program to generate a PDF containing all of the
+      # codes. The program will then automatically delete all of the QR code files.
       self.path = tk.filedialog.askdirectory(title='Select Folder')
       print(self.path)
 
@@ -102,7 +113,6 @@ class Flatplatedata(tk.Frame):
       quant_lo = int(self.quant_low.get())
       quant_hi = 1
       quant_hi = int(self.quant_high.get())
-      quantity = quant_hi - quant_lo
 
       # Generate product code and QRcode
       codeset = []  # list contains generated product codes
@@ -116,8 +126,7 @@ class Flatplatedata(tk.Frame):
         # Generate QRcode
         url = generate_url(code)
         qr = pyqrcode.create(url)
-        # for macs
-        #qr_path = self.path + '/' + str(code) + '.png'
+        #qr_path = self.path + '/' + str(code) + '.png'  # for running on macOS
         qr_path = self.path + '\\' + str(code) + '.png'
         qr.png(qr_path, scale=2)
         qrset.append(qr_path)
@@ -133,24 +142,26 @@ class Flatplatedata(tk.Frame):
 
     # Generate the pdf
     def get_pdf(self, codeset, qrset):
+      # Get custom dimensions depending on the tempalte
       (label_h, label_w, top_mar, bot_mar, left_mar, right_mar, num_col, num_row) = self.get_template_dim()
-
+      # Set up the specs for Letter Paper and Tempalte Type
       specs = labels.Specification(215.9, 279.4, num_col, num_row, label_w, label_h, corner_radius=1,
               top_margin=top_mar, bottom_margin=bot_mar, left_margin=left_mar, right_margin=right_mar)
+      # Initialize the sheet that will be used for adding labels
       sheet = labels.Sheet(specs, self.draw_label, border=False)
 
       for i in range(len(codeset)):
+        # Calls in a dictionary to add both the product code and QR code onto the same label. The dictionary is read
+        # in the function draw_label.
         _print_dict = {
                 'text' : codeset[i],
                 'image' : qrset[i],
             }
         sheet.add_label(_print_dict)
-      
+
       filename = "{}-{}-{}-{}".format(self.fibtype_str.get(), self.gsmtype_str.get(), self.lottype.get(), self.manyearlab_str.get())
-      # for mac
-      #sheet.save(self.path + '/flatplates_codes.pdf')
-      # for windows
-      sheet.save(self.path + '\\' + filename + '_' +self.template_str.get() + '.pdf')
+      #sheet.save(self.path + filename + '_' + self.template_str.get() + '.pdf')  # macs
+      sheet.save(self.path + '\\' + filename + '_' +self.template_str.get() + '.pdf') # windows
 
       # Delete files in path
       for i in qrset:
