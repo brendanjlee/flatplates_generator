@@ -137,7 +137,7 @@ class Flatplatedata(tk.Frame):
 
       specs = labels.Specification(215.9, 279.4, num_col, num_row, label_w, label_h, corner_radius=1,
               top_margin=top_mar, bottom_margin=bot_mar, left_margin=left_mar, right_margin=right_mar)
-      sheet = labels.Sheet(specs, self.draw_label, border=True)
+      sheet = labels.Sheet(specs, self.draw_label, border=False)
 
       for i in range(len(codeset)):
         _print_dict = {
@@ -145,11 +145,12 @@ class Flatplatedata(tk.Frame):
                 'image' : qrset[i],
             }
         sheet.add_label(_print_dict)
-
+      
+      filename = "{}-{}-{}-{}".format(self.fibtype_str.get(), self.gsmtype_str.get(), self.lottype.get(), self.manyearlab_str.get())
       # for mac
       #sheet.save(self.path + '/flatplates_codes.pdf')
       # for windows
-      sheet.save(self.path + '\\flatplates_codes.pdf')
+      sheet.save(self.path + '\\' + filename + '_' +self.template_str.get() + '.pdf')
 
       # Delete files in path
       for i in qrset:
@@ -163,11 +164,15 @@ class Flatplatedata(tk.Frame):
     # The size and font changes depending on the template
     def draw_label(self, label, width, height, obj):
       if self.template_str.get() == 'Avery_6467':
-        label.add(shapes.String(4, 15, obj.get('text'), fontName="Helvetica", fontSize=8))
-        label.add(Image(90, 4, 30, 30, obj.get('image')))
+        # Add text for 6467. Change font size depending on number
+        if len(obj.get('text')) > 20:
+          label.add(shapes.String(2, 15, obj.get('text'), fontName="Helvetica", fontSize=7))
+        else:
+          label.add(shapes.String(2, 15, obj.get('text'), fontName="Helvetica", fontSize=8))
+        label.add(Image(87, 6, 29, 29, obj.get('image')))
       elif self.template_str.get() == 'Avery_5161':
         label.add(shapes.String(15, 30, obj.get('text'), fontName="Helvetica", fontSize=12))
-        label.add(Image(180, 4, 60, 60, obj.get('image')))
+        label.add(Image(180, 12, 50, 50, obj.get('image')))
       elif self.template_str.get() == 'Avery_94214':
         label.add(shapes.String(10, 15, obj.get('text'), fontName="Helvetica", fontSize=10))
         label.add(Image(150, 2, 40, 40, obj.get('image')))
@@ -177,9 +182,11 @@ class Flatplatedata(tk.Frame):
     def get_template_dim(self):
       template = self.template_str.get()
       if template == 'Avery_6467':
-        return (12.7, 44.45, 12.7, 10.668, 9.906, 7.874, 4, 20)
+        return (12.7, 43, 12.7, 10.968, 10.6, 7.8, 4, 20)
+        #return (12.7, 44.45, 12.7, 10.668, 9.906, 7.874, 4, 20)
       elif template == 'Avery_94214':
-        return (15.875, 76.2, 12.7, 10.668, 23.622, 7.874, 2, 16)
+        return (15.875, 76.2, 12.7, 12.668, 23.622, 23.622, 2, 16)
+        #return (15.875, 76.2, 12.7, 10.668, 23.622, 7.874, 2, 16)
       elif template == 'Avery_5161':
         return (25.4, 100, 12.7, 10.668, 6.35, 7.874, 2, 10)
 
