@@ -1,15 +1,17 @@
 from __main__ import *
-import tkinter as tk
-from tkinter.filedialog import asksaveasfile
-import pyqrcode
-import png
-import labels
+import tkinter as tk # GUI
+from tkinter.filedialog import asksaveasfile # GUI
+import pyqrcode # qr code generation
+import png # qr code picture saving
+import labels # pip install pylabels
 import os
 import sys
-from reportlab.graphics import shapes
-from reportlab.graphics.shapes import Image
+from reportlab.graphics import shapes # for pylabel labels
+from reportlab.graphics.shapes import Image # for pylabel labels
+import random, string
 
-# Set Template Options
+
+# Set Template Options. Add needed options
 template_options = ['Avery_6467', 'Avery_94214', 'Avery_5161']
 fiber_options = ["C3", "C4", "C5", "D3", "D4", "D5"]  # list entries for fiber options dropdown
 gsm_options = ["69", "76", "120", "125"]  # list entries for gsm options dropdown
@@ -101,6 +103,7 @@ class Flatplatedata(tk.Frame):
                                relief="ridge", font=("Helvetica", "14", "bold"), command=self.generate_codes)
         prevButton.place(x=175, y=435)
 
+
     # Takes input from GUI to prepare for printing
     def generate_codes(self):
       # Ask for path
@@ -120,14 +123,15 @@ class Flatplatedata(tk.Frame):
       code = ''
 
       for i in range(quant_lo, quant_hi + 1):
+        unique_code = random.choice(string.ascii_letters) # throws in a unique code at the end for qrcodes
         # Get Product Code
         code = "{}-{}-{}-{}-{}".format(self.fibtype_str.get(), self.gsmtype_str.get(), self.lottype.get(), self.manyearlab_str.get(), i)
         codeset.append(code)
         # Generate QRcode
         url = generate_url(code)
         qr = pyqrcode.create(url)
-        #qr_path = self.path + '/' + str(code) + '.png'  # for running on macOS
-        qr_path = self.path + '\\' + str(code) + '.png'
+        #qr_path = self.path + '/' + str(code) + unique_code + '.png'  # for running on macOS
+        qr_path = self.path + '\\' + str(code) + '.png' # for running on Windows
         qr.png(qr_path, scale=2)
         qrset.append(qr_path)
 
@@ -137,18 +141,20 @@ class Flatplatedata(tk.Frame):
       codePrev = tk.Label(self.parent, text=code, fg='black', relief="sunken", font=("Helvetica", "24", "bold")) #product code label
       codePrev.place(x=70, y=370)
 
+      # Call get_pdf() function to send in codeset and qrset
       self.get_pdf(codeset, qrset)
 
 
     # Generate the pdf
     def get_pdf(self, codeset, qrset):
       # Get custom dimensions depending on the tempalte
-      (label_h, label_w, top_mar, bot_mar, left_mar, right_mar, num_col, num_row) = self.get_template_dim()
+      (label_h, label_w, top_mar, bot_mar, left_mar, right_mar, num_col, num_row, cgap, rgap) = self.get_template_dim()
       # Set up the specs for Letter Paper and Tempalte Type
       specs = labels.Specification(215.9, 279.4, num_col, num_row, label_w, label_h, corner_radius=1,
-              top_margin=top_mar, bottom_margin=bot_mar, left_margin=left_mar, right_margin=right_mar)
+              top_margin=top_mar, bottom_margin=bot_mar, left_margin=left_mar, right_margin=right_mar, column_gap=cgap, row_gap=rgap)
+
       # Initialize the sheet that will be used for adding labels
-      sheet = labels.Sheet(specs, self.draw_label, border=False)
+      sheet = labels.Sheet(specs, self.draw_label, border=False) # set border=True for testing with borders. (Turn it off for printing to paper)
 
       for i in range(len(codeset)):
         # Calls in a dictionary to add both the product code and QR code onto the same label. The dictionary is read
@@ -160,12 +166,11 @@ class Flatplatedata(tk.Frame):
         sheet.add_label(_print_dict)
 
       filename = "{}-{}-{}-{}".format(self.fibtype_str.get(), self.gsmtype_str.get(), self.lottype.get(), self.manyearlab_str.get())
-      #sheet.save(self.path + filename + '_' + self.template_str.get() + '.pdf')  # macs
+      #sheet.save(self.path + '/' + filename + '_' + self.template_str.get() + '.pdf')  # macs
       sheet.save(self.path + '\\' + filename + '_' +self.template_str.get() + '.pdf') # windows
 
       # Delete files in path
       for i in qrset:
-        print('deleted' + i)
         os.remove(i)
 
       print('Print Complete')
@@ -173,33 +178,40 @@ class Flatplatedata(tk.Frame):
 
     # Draw two objects into label: product code and QRcode
     # The size and font changes depending on the template
+    # shapes.String -> the produce code saved in _print_dict
+    # Image() -> the QRcode png accessed through filepath stored under 'image' in _print_dict
     def draw_label(self, label, width, height, obj):
+      # 4 * 20
       if self.template_str.get() == 'Avery_6467':
-        # Add text for 6467. Change font size depending on number
-        if len(obj.get('text')) > 20:
-          label.add(shapes.String(2, 15, obj.get('text'), fontName="Helvetica", fontSize=7))
+        txt = obj.get('text')
+        if len(txt) > 22:
+          t1 = txt[0:len(txt)//2]
+          t2 = txt[len(txt)//2 if len(txt)%2 == 0
+                                 else ((len(txt)//2)+1):]
+          label.add(shapes.String(7, 20, t1, fontName="Helvetica", fontSize=7))
+          label.add(shapes.String(7, 5, t2, fontName="Helvetica", fontSize=7))
         else:
-          label.add(shapes.String(2, 15, obj.get('text'), fontName="Helvetica", fontSize=8))
-        label.add(Image(87, 6, 29, 29, obj.get('image')))
+          label.add(shapes.String(5, 15, obj.get('text'), fontName="Helvetica", fontSize=7))
+        label.add(Image(85, 5, 29, 29, obj.get('image')))
+      # 2 * 10
       elif self.template_str.get() == 'Avery_5161':
-        label.add(shapes.String(15, 30, obj.get('text'), fontName="Helvetica", fontSize=12))
-        label.add(Image(180, 12, 50, 50, obj.get('image')))
+        label.add(shapes.String(20, 30, obj.get('text'), fontName="Helvetica", fontSize=13))
+        label.add(Image(180, 12, 55, 55, obj.get('image')))
+      # 2 * 16
       elif self.template_str.get() == 'Avery_94214':
         label.add(shapes.String(10, 15, obj.get('text'), fontName="Helvetica", fontSize=10))
-        label.add(Image(150, 2, 40, 40, obj.get('image')))
+        label.add(Image(160, 2, 40, 40, obj.get('image')))
 
-    # return template dim -> (label_h, label_w, top_mar, bot_mar, left_mar, right_mar, num_col, num_row)
+    # return template dim -> (label_h, label_w, top_mar, bot_mar, left_mar, right_mar, num_col, num_row, col_gap, row_gap)
     # All measurements are in mm
     def get_template_dim(self):
       template = self.template_str.get()
       if template == 'Avery_6467':
-        return (12.7, 43, 12.7, 10.968, 10.6, 7.8, 4, 20)
-        #return (12.7, 44.45, 12.7, 10.668, 9.906, 7.874, 4, 20)
+        return (12.7, 44.5, 12.7, 12.7, 9.6, 7, 4, 20, 7.1, 0)
       elif template == 'Avery_94214':
-        return (15.875, 76.2, 12.7, 12.668, 23.622, 23.622, 2, 16)
-        #return (15.875, 76.2, 12.7, 10.668, 23.622, 7.874, 2, 16)
+        return (15.875, 76.2, 12.7, 12.7, 21, 21.49, 2, 16, 21.01, 0)
       elif template == 'Avery_5161':
-        return (25.4, 100, 12.7, 10.668, 6.35, 7.874, 2, 10)
+        return (25.4, 101.8, 12.7, 12.7, 5, 3.3, 2, 10, 4, 0)
 
 
 if __name__ == '__main__':
