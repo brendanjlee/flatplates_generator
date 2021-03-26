@@ -32,7 +32,7 @@ class Flatplatedata(tk.Frame):
 
     # Function initializes the user interface (GUI)
     def initialize_user_interface(self):
-        self.parent.geometry("500x500")
+        self.parent.geometry("500x500") # the size of the canvas
         self.parent.title("Flatplate label/QR generator")
 
         # Title Label
@@ -42,8 +42,8 @@ class Flatplatedata(tk.Frame):
 
         # Allows User to choose template type
         self.template_lab = tk.Label(self.parent, text='Print Template Type:', fg='black', relief='sunken',
-                                     font=('Helvetica', '12', 'bold'))
-        self.template_lab.place(x=70, y = 35)
+                                     font=('Helvetica', '12', 'bold'))  # the label next to the button
+        self.template_lab.place(x=70, y = 35);
         self.template_str = tk.StringVar(self.parent) # contains value
         self.template_str.set(template_options[0])
         self.template_type = tk.OptionMenu(self.parent, self.template_str, *template_options)
