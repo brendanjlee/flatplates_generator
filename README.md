@@ -4,7 +4,10 @@ Create QR Code labels for Flatplates with Python.
 
 Uses a simple GUI to produce sheets of QR Code labels on following formats: Avery 6467, Avery 5161, and Avery 94214.<br>
 
-Dependencies:<br>
+
+## Technologies and Dependencies
+### Dependencies:<br>
+You must import these packages using PIP or Conda in order to modify and run the program.
 ```
 import tkinter as tk
 import pyqrcode
@@ -13,13 +16,27 @@ import labels
 from reportlab.graphics import shapes
 from reportlab.graphics.shapes import Image
 ```
+### Creating an executable using PyInstaller
+This project was created with the help of [this](https://jacob-brown.github.io/2019-09-10-pyinstaller/) tutorial.
+#### Installing PyInstaller
+```
+pip install pyinstaller
+```
+#### Creating an Executable for Windows
+```
+$ pyinstaller --windowed --onefile qrGenerator.py
+```
+#### Creating an Executable for Mac
+```
+pyinstaller --windowed  DogsGo.py
+```
 
 Demo of GUI
 <br>
 <img width="507" alt="Screen Shot 2021-03-16 at 4 45 00 PM" src="https://user-images.githubusercontent.com/31088155/111377377-f3d4bb00-8676-11eb-91f1-1e3439fe6cef.png">
 
 ---
-## How to Modify the Code
+## Code Examples
 ```qrGenerator.py```
 ### Template Options
 To set options for template, fiber, gsm, and manyufacture year, add to these lists in :
