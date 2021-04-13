@@ -9,6 +9,9 @@ Uses a simple GUI to produce sheets of QR Code labels on following formats: Aver
 ### Dependencies:<br>
 You must import these packages using PIP or Conda in order to modify and run the program.
 ```
+in qrGenerator.py:
+```
+```
 import tkinter as tk
 import pyqrcode
 import png
