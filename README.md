@@ -4,6 +4,11 @@ Create QR Code labels for Flatplates with Python.
 
 Uses a simple GUI to produce sheets of QR Code labels on following formats: Avery 6467, Avery 5161, and Avery 94214.<br>
 
+##### Table of Contents
+* [Technologies and Dependencies]()
+* [Running the Code]()
+* [GUI Demo]()
+* [Code Examples]()
 
 ## Technologies and Dependencies
 ### Dependencies:<br>
@@ -33,6 +38,13 @@ $ pyinstaller --windowed --onefile qrGenerator.py
 ```
 pyinstaller --windowed  DogsGo.py
 ```
+
+## Running the Code
+If you want to run the code without creating an executable, you can simpy type
+```
+python qrGenerator.py
+```
+in the terminal. This should prompt a window.
 
 ## Demo of GUI
 <br>
