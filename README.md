@@ -5,10 +5,10 @@ Create QR Code labels for Flatplates with Python.
 Uses a simple GUI to produce sheets of QR Code labels on following formats: Avery 6467, Avery 5161, and Avery 94214.<br>
 
 ##### Table of Contents
-* [Technologies and Dependencies]()
-* [Running the Code]()
-* [GUI Demo]()
-* [Code Examples]()
+* [Technologies and Dependencies](#technologies-and-dependencies)
+* [Running the Code](#running-the-code)
+* [GUI Demo](#demo-of-gui)
+* [Code Examples](#code-examples)
 
 ## Technologies and Dependencies
 ### Dependencies:<br>
