@@ -53,17 +53,20 @@ class Flatplatedata(tk.Frame):
         self.fiblab = tk.Label(self.parent, text="Fiber type & ply #:", fg='black', relief="sunken",
                                font=("Helvetica", "12", "bold"))
         self.fiblab.place(x=70, y=80)
-        self.fibtype_str = tk.StringVar(self.parent) # contains value
-        self.fibtype_str.set(fiber_options[0])
-        self.fibtype = tk.OptionMenu(self.parent, self.fibtype_str, *fiber_options)
+        self.fibtype=tk.Entry(self.parent) # contains value
+        self.fibtype.insert(0, "C4")
+        #self.fibtype_str = tk.StringVar(self.parent) # contains value
+        #self.fibtype_str.set(fiber_options[0])
+        #self.fibtype = tk.OptionMenu(self.parent, self.fibtype_str, *fiber_options)
         self.fibtype.place(x=300, y=83)
 
         # Label and Field GSM
         self.gsmlab=tk.Label(self.parent,text="GSM:",fg='black', relief="sunken", font=("Helvetica", "12", "bold"))
         self.gsmlab.place(x=70, y=125)
-        self.gsmtype_str = tk.StringVar(self.parent) # contains value
-        self.gsmtype_str.set(gsm_options[0])
-        self.gsmtype = tk.OptionMenu(self.parent, self.gsmtype_str, *gsm_options)
+        self.gsmtype = tk.Entry(self.parent) # contains value
+        #self.gsmtype.set(gsm_options[0])
+        self.gsmtype.insert(0, "69")
+        #self.gsmtype = tk.OptionMenu(self.parent, self.gsmtype, *gsm_options)
         self.gsmtype.place(x=300, y=128)
 
         # Label and Field Lot
@@ -78,9 +81,10 @@ class Flatplatedata(tk.Frame):
         self.manyearlab = tk.Label(self.parent, text="Manufacturer & Year:", fg='black', relief="sunken",
                                    font=("Helvetica", "12", "bold"))
         self.manyearlab.place(x=70, y=215)
-        self.manyearlab_str = tk.StringVar(self.parent) # contains value
-        self.manyearlab_str.set(manyear_options[0])
-        self.manyeartype = tk.OptionMenu(self.parent, self.manyearlab_str, *manyear_options)
+        self.manyeartype = tk.Entry(self.parent) # contains value
+        #self.manyearlab_str.set(manyear_options[0])
+        self.manyeartype.insert(0, "P22")
+        #self.manyeartype = tk.OptionMenu(self.parent, self.manyearlab_str, *manyear_options)
         self.manyeartype.place(x=300, y=218)
 
         # Label and Field for Part Identifier
@@ -125,7 +129,7 @@ class Flatplatedata(tk.Frame):
       for i in range(quant_lo, quant_hi + 1):
         unique_code = random.choice(string.ascii_letters) # throws in a unique code at the end for qrcodes
         # Get Product Code
-        code = "{}-{}-{}-{}-{}".format(self.fibtype_str.get(), self.gsmtype_str.get(), self.lottype.get(), self.manyearlab_str.get(), i)
+        code = "{}-{}-{}-{}-{}".format(self.fibtype.get(), self.gsmtype.get(), self.lottype.get(), self.manyeartype.get(), i)
         codeset.append(code)
         # Generate QRcode
         url = generate_url(code)
@@ -165,7 +169,7 @@ class Flatplatedata(tk.Frame):
             }
         sheet.add_label(_print_dict)
 
-      filename = "{}-{}-{}-{}".format(self.fibtype_str.get(), self.gsmtype_str.get(), self.lottype.get(), self.manyearlab_str.get())
+      filename = "{}-{}-{}-{}".format(self.fibtype.get(), self.gsmtype.get(), self.lottype.get(), self.manyeartype.get())
       #sheet.save(self.path + '/' + filename + '_' + self.template_str.get() + '.pdf')  # macs
       sheet.save(self.path + '\\' + filename + '_' +self.template_str.get() + '.pdf') # windows
 
